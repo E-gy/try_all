@@ -5,5 +5,6 @@ authors = ["E-gy"]
 edition = "2018"
 description = "Extends iterators with `try_all` to convert iterator of results into result of iterator of okays"
 repository = "https://github.com/E-gy/try_all"
+license = "MIT"
 
 [dependencies]
