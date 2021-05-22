@@ -21,3 +21,5 @@
 
 mod iter;
 pub use iter::*;
+mod map;
+pub use map::*;
