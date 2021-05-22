@@ -1,21 +1,27 @@
 /// Trait providing try extensions to Iterators.
 pub trait TryAll {
 	type AllOrFirst;
-	/// Tries all items of the iterator until one fails (or all succeed).
-	///
+	/// Ensures that all items of the iterator are Ok, otherwise returns the first failure.
+	///	///
 	/// # Returns
 	///
 	/// The iterator of all successes, or the first failure.
 	/// 
 	/// # Examples
 	///
-	/// Useful for propagating failures from within closures with `?` operator:
-	/// ```
+	/// Useful to ensure that all items are valid.
+	/// ```rust
 	/// # use crate::try_all::*;
 	/// fn parse_all_numbers(strs: &Vec<&str>) -> Result<Vec<u64>, std::num::ParseIntError> {
 	/// 	Ok(strs.iter().map(|s| s.parse()).try_all()?.collect())
 	/// }
 	/// ```
+	///
+	/// # Equivalence
+	///
+	/// `iter.try_all` is equivalent to `iter.try_map_all(|t| t)`, except all try-iable variants are implemented under a single name.
+	///
+	/// Additionally, it is equivalent to `collect`ing the iterator into [`Vec`], checking that `all()` are okay, and turning Vec back [`Vec::into_iter()`] (plus additional logic if the offending error needs to be retrieved). 
 	///
 	/// Due to the nature of operation, the function has to collect intermediate results.
 	/// In other words, if production has side effects, expect them for all items until \[including\] first failure.

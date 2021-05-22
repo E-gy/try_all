@@ -1,7 +1,50 @@
 type Recollector<T> = std::vec::IntoIter<T>;
 
+/// Trait providing try map (result) extensions to Iterators.
+///
+/// See [`TryMapAll::try_map_all`].
+///
+/// Once `Try` (#42327) is stabilized, hopefully the `Result` and `Option` variants can be merged and generalized.
 pub trait TryMapAll {
 	type Item;
+	/// Applies a closure on all items of the iterator until one fails (or all succeed).
+	///
+	/// # Arguments
+	///
+	/// - `f`: fallible mapping function
+	///
+	/// # Returns
+	///
+	/// The iterator of all successes, or the first failure.
+	/// 
+	/// # Examples
+	///
+	/// Useful for propagating failures from within closures with `?` operator:
+	/// ```rust
+	/// # use crate::try_all::*;
+	/// fn all_numbers_x2(strs: &Vec<&str>) -> Result<Vec<u64>, std::num::ParseIntError> {
+	/// 	Ok(strs.iter().try_map_all(|s| Ok(s.parse::<u64>()?*2))?.collect())
+	/// }
+	/// ```
+	///
+	/// # Equivalence
+	///
+	/// `iter.try_map_all(f)` is equivalent to `iter.map(f).try_all()`, except the latter works with `Option`s just as well (or check out [`TryMapAllOption::try_map_all_opt()`]).
+	///
+	/// Additionally, it is equivalent to
+	/// ```rust
+	/// # fn hehe<U, T, E>(iter: impl Iterator<Item=U>, f: impl Fn(U) -> Result<T, E>) -> Result<Vec<T>, E> {
+	///	let mut acc = Vec::new();
+	/// for item in iter {
+	/// 	acc.push(f(item)?);
+	/// }
+	/// Ok(acc)
+	/// # }
+	/// ```
+	///
+	/// Due to the nature of operation, the function has to collect intermediate results.
+	/// In other words, if `f` has side effects, expect them for all applications until \[including\] first failure.
+	/// Additionally, this won't work on infinite sequences :o.
 	fn try_map_all<T, E>(self, f: impl Fn(Self::Item) -> Result<T, E>) -> Result<Recollector<T>, E>;
 }
 
@@ -16,8 +59,38 @@ impl<I: Iterator> TryMapAll for I {
 	}
 }
 
+/// Trait providing try map (option) extensions to Iterators.
+///
+/// See [`TryMapAllOption::try_map_all_opt`].
+///
+/// Once `Try` (#42327) is stabilized, hopefully the `Result` and `Option` variants can be merged and generalized.
 pub trait TryMapAllOption {
 	type Item;
+	/// Applies a closure on all items of the iterator until one fails (or all succeed).
+	///
+	/// This is [`TryMapAll::try_map_all`] - `Option` edition.
+	///
+	/// # Arguments
+	///
+	/// - `f`: fallible mapping function
+	///
+	/// # Returns
+	///
+	/// The iterator of all successes, or the first failure.
+	/// 
+	/// # Examples
+	///
+	/// Useful for propagating failures from within closures with `?` operator:
+	/// ```rust
+	/// # use crate::try_all::*;
+	/// fn not_zero(is: Vec<u64>) -> Option<Vec<u64>> {
+	/// 	Some(is.into_iter().try_map_all_opt(|i| if i > 0 { Some(i) } else { None })?.collect())
+	/// }
+	/// ```
+	///
+	/// Due to the nature of operation, the function has to collect intermediate results.
+	/// In other words, if `f` has side effects, expect them for all applications until \[including\] first failure.
+	/// Additionally, this won't work on infinite sequences :o.
 	fn try_map_all_opt<T>(self, f: impl Fn(Self::Item) -> Option<T>) -> Option<Recollector<T>>;
 }
 
