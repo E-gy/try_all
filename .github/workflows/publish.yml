@@ -37,4 +37,4 @@ jobs:
           args: ${{ secrets.CRATES_TOKEN }}
       - uses: actions-rs/cargo@v1
         with:
-          command: publish --locked
+          command: publish
