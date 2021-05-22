@@ -1,0 +1,9 @@
+[package]
+name = "try_all"
+version = "0.0.0"
+authors = ["E-gy"]
+edition = "2018"
+description = "`try_all`"
+repository = "https://github.com/E-gy/try_all"
+
+[dependencies]
