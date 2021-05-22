@@ -1,4 +1,4 @@
-# try_all
+[![crates.io](https://img.shields.io/crates/v/try_all.svg)](https://crates.io/crates/try_all)
 
 Rust iterator extensions to operate on `Result`s effectively.
 
