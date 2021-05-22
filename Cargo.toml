@@ -3,7 +3,7 @@ name = "try_all"
 version = "0.0.0"
 authors = ["E-gy"]
 edition = "2018"
-description = "`try_all`"
+description = "Extends iterators with `try_all` to convert iterator of results into result of iterator of okays"
 repository = "https://github.com/E-gy/try_all"
 
 [dependencies]
