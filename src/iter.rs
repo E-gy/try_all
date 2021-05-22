@@ -2,16 +2,23 @@
 pub trait TryAll {
 	type AllOrFirst;
 	/// Tries all items of the iterator until one fails (or all succeed).
+	///
+	/// # Returns
+	///
+	/// The iterator of all successes, or the first failure.
 	/// 
+	/// # Examples
+	///
 	/// Useful for propagating failures from within closures with `?` operator:
 	/// ```
+	/// # use crate::try_all::*;
 	/// fn parse_all_numbers(strs: &Vec<&str>) -> Result<Vec<u64>, std::num::ParseIntError> {
 	/// 	Ok(strs.iter().map(|s| s.parse()).try_all()?.collect())
 	/// }
 	/// ```
 	///
 	/// Due to the nature of operation, the function has to collect intermediate results.
-	/// In other words, if production has sideffects, expect them for all items until \[including\] first failure.
+	/// In other words, if production has side effects, expect them for all items until \[including\] first failure.
 	/// Additionally, this won't work on infinite sequences :o.
 	fn try_all(self) -> Self::AllOrFirst;
 }
@@ -57,3 +64,15 @@ impl<T, E, I> TryAllHack for (I, Result<T, E>) where I: Iterator<Item=Result<T, 
 	}
 }
 
+#[cfg(test)]
+mod test {
+	use super::*;
+	#[test]
+	fn test_try_all(){
+		assert_eq!(vec![Some(0), Some(1), Some(2)].into_iter().try_all().map(|v| v.collect::<Vec<_>>()), Some(vec![0, 1, 2]));
+		assert_eq!(vec![Some(0), None, Some(2)].into_iter().try_all().map(|v| v.collect::<Vec<_>>()), None);
+		assert_eq!(vec![Ok(0), Ok(1), Ok(2), Err("no u!")].into_iter().take(3).try_all().map(|v| v.collect()), Ok(vec![0, 1, 2]));
+		assert_eq!(vec![Ok(0), Ok(1), Err("no u!")].into_iter().try_all().map(|v| v.collect::<Vec<_>>()), Err("no u!"));
+		assert_eq!(vec![Err("me is 1st"), Ok(1), Err("no u!")].into_iter().try_all().map(|v| v.collect::<Vec<_>>()), Err("me is 1st"));
+	}
+}
