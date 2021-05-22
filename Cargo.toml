@@ -1,6 +1,6 @@
 [package]
 name = "try_all"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["E-gy"]
 edition = "2018"
 description = "Extends iterators with `try_all` to convert iterator of results into result of iterator of okays"
